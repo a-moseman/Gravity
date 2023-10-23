@@ -7,20 +7,20 @@ import java.awt.*;
 public class Body {
     public final double MASS;
     public final int RENDER_SIZE;
-    private Vector position;
-    private Vector velocity;
+    public final Vector POSITION;
+    public final Vector VELOCITY;
     private double speed;
 
-    public Body(double mass, Vector position) {
+    public Body(double mass, Vector initialPosition) {
         MASS = mass;
         RENDER_SIZE = (int) Math.sqrt(mass) + 1;
-        this.position = position;
-        this.velocity = Vector.zero();
+        POSITION = initialPosition;
+        VELOCITY = Vector.zero();
     }
 
     public void applyForce(Vector force, double deltaTime) {
-        velocity.add(force.product(deltaTime / MASS));
-        speed = velocity.magnitude();
+        VELOCITY.add(force.product(deltaTime / MASS));
+        speed = VELOCITY.magnitude();
     }
 
     public void applyForce(Vector force) {
@@ -28,15 +28,7 @@ public class Body {
     }
 
     public void update(double deltaTime) {
-        position.add(velocity.product(deltaTime));
-    }
-
-    public Vector getPosition() {
-        return position;
-    }
-
-    public Vector getVelocity() {
-        return velocity;
+        POSITION.add(VELOCITY.product(deltaTime));
     }
 
     public double getSpeed() {
@@ -47,6 +39,6 @@ public class Body {
         double r = Math.min(1, speed / avgVel);
         double b = 1.0 - r;
         graphics.setColor(new Color((float) r, 0.0f, (float) b, 1.0f));
-        graphics.fillOval((int) position.getX() + 960 - RENDER_SIZE / 2, (int) position.getY() + 540 - RENDER_SIZE / 2, RENDER_SIZE, RENDER_SIZE);
+        graphics.fillOval((int) POSITION.getX() + 960 - RENDER_SIZE / 2, (int) POSITION.getY() + 540 - RENDER_SIZE / 2, RENDER_SIZE, RENDER_SIZE);
     }
 }

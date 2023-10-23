@@ -82,7 +82,7 @@ public class Simulation {
                     continue;
                 }
                 otherBody = BODIES[j];
-                direction = targetBody.getPosition().direction(otherBody.getPosition());
+                direction = targetBody.POSITION.direction(otherBody.POSITION);
                 gravitationalForce = calculateGravity(targetBody, otherBody);
                 accumulatedForce.add(direction.product(gravitationalForce));
             }
@@ -91,7 +91,7 @@ public class Simulation {
     }
 
     private double calculateGravity(Body a, Body b) {
-        double r = a.getPosition().distance(b.getPosition());
+        double r = a.POSITION.distance(b.POSITION);
         double m = a.MASS / 2 + b.MASS / 2;
         r = Math.max(r, m);
         return GRAVITATIONAL_CONSTANT * ((a.MASS * b. MASS) / (r * r));
