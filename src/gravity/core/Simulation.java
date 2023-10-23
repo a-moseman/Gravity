@@ -9,19 +9,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-public class Simulation {
+public class Simulation implements Updatable, Renderable {
     private final ExecutorService EXECUTOR_SERVICE;
-    private final double GRAVITATIONAL_CONSTANT;
     private final Body[] BODIES;
-    private final Statistics STATISTICS;
     private final Future<Vector>[] WORKING_FUTURE_FORCES_ARRAY;
     private double lastDeltaTime;
 
-    public Simulation(ExecutorService executorService, double gravitationalConstant, int count) {
+    public Simulation(ExecutorService executorService, int count) {
         EXECUTOR_SERVICE = executorService;
-        GRAVITATIONAL_CONSTANT = gravitationalConstant;
         BODIES = new Body[count];
-        STATISTICS = new Statistics();
         WORKING_FUTURE_FORCES_ARRAY = new Future[count];
         initializeBodies();
     }
@@ -40,6 +36,7 @@ public class Simulation {
         return body;
     }
 
+    @Override
     public void update(double deltaTime) {
         lastDeltaTime = deltaTime;
         updateBodyVelocities(deltaTime);
@@ -63,12 +60,12 @@ public class Simulation {
     }
 
     private void updateBodyPositions(double deltaTime) {
-        STATISTICS.reset();
+        Statistics.reset();
         for (Body body : BODIES) {
             body.update(deltaTime);
-            STATISTICS.addToSum(body);
+            Statistics.addToSum(body);
         }
-        STATISTICS.calcAvg(BODIES.length);
+        Statistics.calcAvg(BODIES.length);
     }
 
     private Future<Vector> calculateDeltaGravityForce(int i) {
@@ -84,16 +81,17 @@ public class Simulation {
                 }
                 otherBody = BODIES[j];
                 direction = targetBody.POSITION.direction(otherBody.POSITION);
-                gravitationalForce = Physics.gravityForceBetweenBodies(GRAVITATIONAL_CONSTANT, targetBody.POSITION, otherBody.POSITION, targetBody.MASS, otherBody.MASS);
+                gravitationalForce = Physics.gravityForceBetweenBodies(targetBody.POSITION, otherBody.POSITION, targetBody.MASS, otherBody.MASS);
                 accumulatedForce.add(direction.product(gravitationalForce));
             }
             return accumulatedForce;
         });
     }
 
+    @Override
     public void render(Graphics graphics) {
         for (Body body : BODIES) {
-            body.render(graphics, STATISTICS.getAvgVelocity());
+            body.render(graphics);
         }
         renderDebugInfo(graphics);
     }
@@ -102,7 +100,7 @@ public class Simulation {
         graphics.setColor(Color.BLUE);
         graphics.drawString(String.format("DT: %.4f", lastDeltaTime), 32, 32);
         graphics.drawString(String.format("TPS: %.4f", 1.0 / lastDeltaTime), 32, 64);
-        graphics.drawString(String.format("SUM V: %.4f", STATISTICS.getSumVelocity()), 32, 96);
-        graphics.drawString(String.format("AVG V: %.4f", STATISTICS.getAvgVelocity()), 32, 128);
+        graphics.drawString(String.format("SUM V: %.4f", Statistics.getSumVelocity()), 32, 96);
+        graphics.drawString(String.format("AVG V: %.4f", Statistics.getAvgVelocity()), 32, 128);
     }
 }

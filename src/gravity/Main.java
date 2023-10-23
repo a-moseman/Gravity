@@ -11,12 +11,11 @@ import java.util.concurrent.Executors;
 public class Main {
     public static final Dimension WINDOW_SIZE = new Dimension(1920, 1080);
     public static final double TPS = 144;
-    public static final double G = 0.1;
     public static final int BODY_COUNT = 2_000;
 
 
     public static void main(String[] args) {
-        Simulation simulation = new Simulation(Executors.newVirtualThreadPerTaskExecutor(), G, BODY_COUNT);
+        Simulation simulation = new Simulation(Executors.newVirtualThreadPerTaskExecutor(), BODY_COUNT);
 
         JFrame frame = new JFrame();
         frame.setSize(WINDOW_SIZE);

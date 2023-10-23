@@ -1,27 +1,27 @@
 package gravity.core;
 
 public class Statistics {
-    private double sumVelocity;
-    private double avgVelocity;
+    private static double sumVelocity;
+    private static double avgVelocity;
 
-    public void reset() {
+    public static void reset() {
         sumVelocity = 0;
         avgVelocity = 0;
     }
 
-    public void addToSum(Body body) {
+    public static void addToSum(Body body) {
         sumVelocity += body.getSpeed();
     }
 
-    public void calcAvg(int size) {
+    public static void calcAvg(int size) {
         avgVelocity = sumVelocity / size;
     }
 
-    public double getSumVelocity() {
+    public static double getSumVelocity() {
         return sumVelocity;
     }
 
-    public double getAvgVelocity() {
+    public static double getAvgVelocity() {
         return avgVelocity;
     }
 }
