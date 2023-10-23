@@ -1,6 +1,7 @@
 package gravity.core;
 
 import gravity.core.math.Generator;
+import gravity.core.math.Physics;
 import gravity.core.math.Vector;
 
 import java.awt.*;
@@ -83,18 +84,11 @@ public class Simulation {
                 }
                 otherBody = BODIES[j];
                 direction = targetBody.POSITION.direction(otherBody.POSITION);
-                gravitationalForce = calculateGravity(targetBody, otherBody);
+                gravitationalForce = Physics.gravityForceBetweenBodies(GRAVITATIONAL_CONSTANT, targetBody.POSITION, otherBody.POSITION, targetBody.MASS, otherBody.MASS);
                 accumulatedForce.add(direction.product(gravitationalForce));
             }
             return accumulatedForce;
         });
-    }
-
-    private double calculateGravity(Body a, Body b) {
-        double r = a.POSITION.distance(b.POSITION);
-        double m = a.MASS / 2 + b.MASS / 2;
-        r = Math.max(r, m);
-        return GRAVITATIONAL_CONSTANT * ((a.MASS * b. MASS) / (r * r));
     }
 
     public void render(Graphics graphics) {
