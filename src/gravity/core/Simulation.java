@@ -4,24 +4,21 @@ import gravity.core.math.Generator;
 import gravity.core.math.Vector;
 
 import java.awt.*;
-import java.security.SecureRandom;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 public class Simulation {
-    private final SecureRandom RANDOM;
     private final ExecutorService EXECUTOR_SERVICE;
-    private final double G;
+    private final double GRAVITATIONAL_CONSTANT;
     private final Body[] BODIES;
     private final Statistics STATISTICS;
     private final Future<Vector>[] WORKING_FUTURE_FORCES_ARRAY;
     private double lastDeltaTime;
 
-    public Simulation(ExecutorService executorService, double g, int count) {
-        RANDOM = new SecureRandom();
+    public Simulation(ExecutorService executorService, double gravitationalConstant, int count) {
         EXECUTOR_SERVICE = executorService;
-        G = g;
+        GRAVITATIONAL_CONSTANT = gravitationalConstant;
         BODIES = new Body[count];
         STATISTICS = new Statistics();
         WORKING_FUTURE_FORCES_ARRAY = new Future[count];
@@ -97,7 +94,7 @@ public class Simulation {
         double r = a.getPosition().distance(b.getPosition());
         double m = a.MASS / 2 + b.MASS / 2;
         r = Math.max(r, m);
-        return G * ((a.MASS * b. MASS) / (r * r));
+        return GRAVITATIONAL_CONSTANT * ((a.MASS * b. MASS) / (r * r));
     }
 
     public void render(Graphics graphics) {
