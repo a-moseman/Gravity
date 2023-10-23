@@ -4,9 +4,11 @@ import gravity.core.Simulation;
 import gravity.core.ui.Renderer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.concurrent.Executors;
 
 public class Main {
+    public static final Dimension WINDOW_SIZE = new Dimension(1920, 1080);
     public static final double TPS = 144;
     public static final double G = 0.1;
     public static final int BODY_COUNT = 2_000;
@@ -17,7 +19,7 @@ public class Main {
         Simulation simulation = new Simulation(G, BODY_COUNT, Executors.newVirtualThreadPerTaskExecutor());
 
         JFrame frame = new JFrame();
-        frame.setSize(1920, 1080);
+        frame.setSize(WINDOW_SIZE);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Renderer renderer = new Renderer(simulation);
         frame.add(renderer);
