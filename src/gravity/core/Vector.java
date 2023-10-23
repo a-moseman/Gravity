@@ -1,5 +1,10 @@
+package gravity.core;
+
 public class Vector {
-    public final static Vector ZERO = new Vector(0, 0);
+    public static Vector zero() {
+        return new Vector(0, 0);
+    }
+
     private double x;
     private double y;
 
