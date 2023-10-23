@@ -5,6 +5,7 @@ import gravity.core.math.Physics;
 import gravity.core.math.Vector;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -90,9 +91,14 @@ public class Simulation implements Updatable, Renderable {
 
     @Override
     public void render(Graphics graphics) {
+        BufferedImage screenBuffer = new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB);
+        Graphics bufferGraphics = screenBuffer.getGraphics();
         for (Body body : BODIES) {
-            body.render(graphics);
+            body.render(bufferGraphics);
         }
+        graphics.drawImage(screenBuffer, 0, 0, null);
+        bufferGraphics.dispose();
+
         renderDebugInfo(graphics);
     }
 

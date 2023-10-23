@@ -11,6 +11,7 @@ public class Renderer extends JPanel {
     public Renderer(Simulation simulation) {
         SIMULATION = simulation;
         setBackground(Color.BLACK);
+        setDoubleBuffered(true);
     }
 
     @Override
@@ -18,5 +19,9 @@ public class Renderer extends JPanel {
         super.paintComponent(g);
         g.setColor(Color.WHITE);
         SIMULATION.render(g);
+        g.setColor(Color.BLUE);
+        g.drawString("COMMANDS: ", 1600, 32);
+        g.drawString("ESCAPE - Stop the simulation", 1600, 64);
+        g.drawString("SPACE - Pause the simulation", 1600, 96);
     }
 }

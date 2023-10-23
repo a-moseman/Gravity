@@ -9,6 +9,7 @@ public class UpdateLoop implements Runnable {
     private final JFrame FRAME;
     private final Simulation SIMULATION;
     private boolean running;
+    private boolean paused;
 
     public UpdateLoop(double targetTPS, JFrame frame, Simulation simulation) {
         TARGET_TPS = targetTPS;
@@ -20,13 +21,13 @@ public class UpdateLoop implements Runnable {
     @Override
     public void run() {
         running = true;
+        paused = false;
         long tickStartTime;
         long tickComputeTime;
         double deltaTime = 1.0 / TARGET_TPS;
         while (running) {
             tickStartTime = System.nanoTime();
-            SIMULATION.update(deltaTime);
-            FRAME.repaint();
+            step(deltaTime);
             tickComputeTime = System.nanoTime() - tickStartTime;
             while ((System.nanoTime() - tickStartTime) < TARGET_TICK_TIME) {
 
@@ -35,7 +36,18 @@ public class UpdateLoop implements Runnable {
         }
     }
 
+    private void step(double deltaTime) {
+        if (!paused) {
+            SIMULATION.update(deltaTime);
+            FRAME.repaint();
+        }
+    }
+
     public void stop() {
         running = false;
+    }
+
+    public void togglePaused() {
+        paused = !paused;
     }
 }

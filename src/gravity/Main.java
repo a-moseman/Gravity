@@ -2,6 +2,7 @@ package gravity;
 
 import gravity.core.Simulation;
 import gravity.core.UpdateLoop;
+import gravity.core.ui.Input;
 import gravity.core.ui.Renderer;
 
 import javax.swing.*;
@@ -19,13 +20,16 @@ public class Main {
 
         JFrame frame = new JFrame();
         frame.setSize(WINDOW_SIZE);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setUndecorated(true);
         Renderer renderer = new Renderer(simulation);
         frame.add(renderer);
-        frame.setVisible(true);
-
         UpdateLoop updateLoop = new UpdateLoop(TPS, frame, simulation);
+        Input input = new Input(updateLoop);
+        frame.addKeyListener(input);
         Thread thread = new Thread(updateLoop);
         thread.start();
+        frame.setVisible(true);
+
     }
 }
