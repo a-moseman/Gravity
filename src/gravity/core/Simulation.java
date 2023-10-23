@@ -91,22 +91,12 @@ public class Simulation implements Updatable, Renderable {
 
     @Override
     public void render(Graphics graphics) {
-        BufferedImage screenBuffer = new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB);
-        Graphics bufferGraphics = screenBuffer.getGraphics();
         for (Body body : BODIES) {
-            body.render(bufferGraphics);
+            body.render(graphics);
         }
-        graphics.drawImage(screenBuffer, 0, 0, null);
-        bufferGraphics.dispose();
-
-        renderDebugInfo(graphics);
     }
 
-    private void renderDebugInfo(Graphics graphics) {
-        graphics.setColor(Color.BLUE);
-        graphics.drawString(String.format("DT: %.4f", lastDeltaTime), 32, 32);
-        graphics.drawString(String.format("TPS: %.4f", 1.0 / lastDeltaTime), 32, 64);
-        graphics.drawString(String.format("SUM V: %.4f", Statistics.getSumVelocity()), 32, 96);
-        graphics.drawString(String.format("AVG V: %.4f", Statistics.getAvgVelocity()), 32, 128);
+    public double getLastDeltaTime() {
+        return lastDeltaTime;
     }
 }

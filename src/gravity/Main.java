@@ -2,6 +2,7 @@ package gravity;
 
 import gravity.core.Simulation;
 import gravity.core.UpdateLoop;
+import gravity.core.ui.Camera;
 import gravity.core.ui.Input;
 import gravity.core.ui.Renderer;
 
@@ -22,10 +23,11 @@ public class Main {
         frame.setSize(WINDOW_SIZE);
         //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
-        Renderer renderer = new Renderer(simulation);
+        Camera camera = new Camera();
+        Renderer renderer = new Renderer(simulation, camera);
         frame.add(renderer);
         UpdateLoop updateLoop = new UpdateLoop(TPS, frame, simulation);
-        Input input = new Input(updateLoop);
+        Input input = new Input(updateLoop, camera);
         frame.addKeyListener(input);
         Thread thread = new Thread(updateLoop);
         thread.start();
