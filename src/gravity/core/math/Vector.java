@@ -1,4 +1,4 @@
-package gravity.core;
+package gravity.core.math;
 
 public class Vector {
     public static Vector zero() {
@@ -58,6 +58,10 @@ public class Vector {
 
     public Vector direction(Vector other) {
         return other.difference(this).normalized();
+    }
+
+    public static Vector fromAngle(double radian) {
+        return new Vector(Math.cos(radian), Math.sin(radian));
     }
 
     public double getX() {

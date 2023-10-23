@@ -16,7 +16,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        Simulation simulation = new Simulation(G, BODY_COUNT, Executors.newVirtualThreadPerTaskExecutor());
+        Simulation simulation = new Simulation(Executors.newVirtualThreadPerTaskExecutor(), G, BODY_COUNT);
 
         JFrame frame = new JFrame();
         frame.setSize(WINDOW_SIZE);

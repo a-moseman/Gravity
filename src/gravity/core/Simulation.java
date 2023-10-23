@@ -1,100 +1,108 @@
 package gravity.core;
 
+import gravity.core.math.Generator;
+import gravity.core.math.Vector;
+
 import java.awt.*;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Simulation {
     private final SecureRandom RANDOM;
+    private final ExecutorService EXECUTOR_SERVICE;
     private final double G;
-    private Body[] bodies;
+    private final Body[] BODIES;
+    private final Statistics STATISTICS;
+    private final Future<Vector>[] WORKING_FUTURE_FORCES_ARRAY;
     private double lastDeltaTime;
-    private ExecutorService executorService;
 
-    public Simulation(double g, int count, ExecutorService executorService) {
+    public Simulation(ExecutorService executorService, double g, int count) {
         RANDOM = new SecureRandom();
+        EXECUTOR_SERVICE = executorService;
         G = g;
-        bodies = new Body[count];
-        initialize();
-        this.executorService = executorService;
+        BODIES = new Body[count];
+        STATISTICS = new Statistics();
+        WORKING_FUTURE_FORCES_ARRAY = new Future[count];
+        initializeBodies();
     }
 
-    private void initialize() {
-        double r, d, m, r2, d2;
-        Vector p;
-        for (int i = 0; i < bodies.length; i++) {
-            r = RANDOM.nextDouble() * Math.PI * 2;
-            d = RANDOM.nextDouble() * 320;
-            p = new Vector(Math.cos(r), Math.sin(r)).product(d);
-            m = RANDOM.nextDouble() * 100 + 25;
-            bodies[i] = new Body(m, p);
-
-            r2 = RANDOM.nextDouble() * Math.PI * 2;
-            d2 = RANDOM.nextDouble() * 10;
-            bodies[i].applyForce(new Vector(Math.cos(r2), Math.sin(r2)).product(d2), 1);
+    private void initializeBodies() {
+        for (int i = 0; i < BODIES.length; i++) {
+            BODIES[i] = generateRandomBody();
         }
+    }
+
+    private Body generateRandomBody() {
+        Vector initialPosition = Vector.fromAngle(Generator.randomAngle()).product(Generator.randomDouble(0, 320));
+        Vector initialForce = Vector.fromAngle(Generator.randomAngle()).product(Generator.randomDouble(0, 10));
+        Body body = new Body(Generator.randomDouble(25, 100), initialPosition);
+        body.applyForce(initialForce);
+        return body;
     }
 
     public void update(double deltaTime) {
         lastDeltaTime = deltaTime;
-        List<Future<Vector>> forces = new ArrayList<>();
-        for (int i = 0; i < bodies.length; i++) {
-            forces.add(calculateDeltaGravityForce(i));
+        updateBodyVelocities(deltaTime);
+        updateBodyPositions(deltaTime);
+    }
+
+    private void updateBodyVelocities(double deltaTime) {
+        for (int i = 0; i < BODIES.length; i++) {
+            WORKING_FUTURE_FORCES_ARRAY[i] = calculateDeltaGravityForce(i);
         }
         Body a;
-        for (int i = 0; i < bodies.length; i++) {
-            a = bodies[i];
+        for (int i = 0; i < BODIES.length; i++) {
+            a = BODIES[i];
             try {
-                a.applyForce(forces.get(i).get(), deltaTime);
+                a.applyForce(WORKING_FUTURE_FORCES_ARRAY[i].get(), deltaTime);
             }
             catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-            a.update(deltaTime);
         }
     }
 
+    private void updateBodyPositions(double deltaTime) {
+        STATISTICS.reset();
+        for (Body body : BODIES) {
+            body.update(deltaTime);
+            STATISTICS.addToSum(body);
+        }
+        STATISTICS.calcAvg(BODIES.length);
+    }
+
     private Future<Vector> calculateDeltaGravityForce(int i) {
-        return executorService.submit(() -> {
-            Vector force = Vector.zero();
-            Body a = bodies[i];
-            Body b;
+        return EXECUTOR_SERVICE.submit(() -> {
+            Vector accumulatedForce = Vector.zero();
+            Body targetBody = BODIES[i];
+            Body otherBody;
             Vector direction;
-            double g;
-            for (int j = 0; j < bodies.length; j++) {
+            double gravitationalForce;
+            for (int j = 0; j < BODIES.length; j++) {
                 if (i == j) {
                     continue;
                 }
-                b = bodies[j];
-                direction = a.getPosition().direction(b.getPosition());
-                g = calculateGravity(a, b);
-                force.add(direction.product(g));
+                otherBody = BODIES[j];
+                direction = targetBody.getPosition().direction(otherBody.getPosition());
+                gravitationalForce = calculateGravity(targetBody, otherBody);
+                accumulatedForce.add(direction.product(gravitationalForce));
             }
-            return force;
+            return accumulatedForce;
         });
     }
 
     private double calculateGravity(Body a, Body b) {
         double r = a.getPosition().distance(b.getPosition());
-        double m = a.getMass() / 2 + b.getMass() / 2;
+        double m = a.MASS / 2 + b.MASS / 2;
         r = Math.max(r, m);
-        return G * ((a.getMass() * b.getMass()) / (r * r));
+        return G * ((a.MASS * b. MASS) / (r * r));
     }
 
     public void render(Graphics graphics) {
-        double avgVel = 0;
-        for (Body body : bodies) {
-            avgVel += body.getVelocity().magnitude();
-        }
-        avgVel /= bodies.length;
-
-        for (int i = 0; i < bodies.length; i++) {
-            bodies[i].render(graphics, avgVel);
+        for (Body body : BODIES) {
+            body.render(graphics, STATISTICS.getAvgVelocity());
         }
         renderDebugInfo(graphics);
     }
@@ -103,10 +111,7 @@ public class Simulation {
         graphics.setColor(Color.BLUE);
         graphics.drawString(String.format("DT: %.4f", lastDeltaTime), 32, 32);
         graphics.drawString(String.format("TPS: %.4f", 1.0 / lastDeltaTime), 32, 64);
-        double sumVelMagn = 0;
-        for (Body body : bodies) {
-            sumVelMagn += body.getVelocity().magnitude();
-        }
-        graphics.drawString(String.format("V: %.4f", sumVelMagn), 32, 96);
+        graphics.drawString(String.format("SUM V: %.4f", STATISTICS.getSumVelocity()), 32, 96);
+        graphics.drawString(String.format("AVG V: %.4f", STATISTICS.getAvgVelocity()), 32, 128);
     }
 }
