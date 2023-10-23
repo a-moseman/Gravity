@@ -15,13 +15,10 @@ public class Main {
     public static final double TPS = 144;
     public static final int BODY_COUNT = 2_000;
 
-
     public static void main(String[] args) {
         Simulation simulation = new Simulation(Executors.newVirtualThreadPerTaskExecutor(), BODY_COUNT);
-
         JFrame frame = new JFrame();
         frame.setSize(WINDOW_SIZE);
-        //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setUndecorated(true);
         Camera camera = new Camera();
         Renderer renderer = new Renderer(simulation, camera);
@@ -32,6 +29,5 @@ public class Main {
         Thread thread = new Thread(updateLoop);
         thread.start();
         frame.setVisible(true);
-
     }
 }
