@@ -33,6 +33,12 @@ public class Quadtree {
     }
 
     public int size() {
-        return root.size();
+        return bodies.size();
     }
+
+    public Body get(int index) {
+        return bodies.get(index);
+    }
+
+
 }

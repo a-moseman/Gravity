@@ -9,8 +9,8 @@ public class Statistics {
         avgVelocity = 0;
     }
 
-    public static void addToSum(Body body) {
-        sumVelocity += body.getSpeed();
+    public static void addToSum(SimBody simBody) {
+        sumVelocity += simBody.getSpeed();
     }
 
     public static void calcAvg(int size) {

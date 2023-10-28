@@ -20,14 +20,21 @@ public class Node {
     protected void add(Body body) {
         addToVirtualBody(virtualBody, body);
         if (virtualBody.size > 1 && canSubSector(sector)) {
-            int quadrant = quadrantInSector(sector, body.posX, body.posY);
-            if (children[quadrant] == null) {
-                children[quadrant] = new Node(subSector(sector, body.posX, body.posY));
+            moveBodyDown(body);
+            if (virtualBody.size == 2) {
+                moveBodyDown(bodies.remove(0));
             }
-            children[quadrant].add(body);
             return;
         }
         bodies.add(body);
+    }
+
+    private void moveBodyDown(Body body) {
+        int quadrant = quadrantInSector(sector, body.posX, body.posY);
+        if (children[quadrant] == null) {
+            children[quadrant] = new Node(subSector(sector, body.posX, body.posY));
+        }
+        children[quadrant].add(body);
     }
 
     protected void remove(Body body) {
@@ -44,13 +51,16 @@ public class Node {
     }
 
     protected void update(Body body, double deltaTime) {
+        // todo: fix
         virtualBody.sumX += body.posX + body.velX * deltaTime;
         virtualBody.sumY += body.posY + body.velY * deltaTime;
         calcVirtualBodyAvgPos(virtualBody);
-
         int currentQuadrant = quadrantInSector(sector, body.posX, body.posY);
         int newQuadrant = quadrantInSector(sector, body.posX + body.velX * deltaTime, body.posY + body.velY * deltaTime);
         if (currentQuadrant == newQuadrant) { // did not move to a new quadrant
+            if (children[currentQuadrant] == null) {
+                return;
+            }
             children[currentQuadrant].update(body, deltaTime);
         }
         else {
